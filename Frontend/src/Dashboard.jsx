@@ -175,7 +175,7 @@ function Dashboard() {
           {/* Statistics */}
           <section className="stats-grid">
 
-            <div className="stat-card">
+            <div className="stat-card users-card">
               <h3>Total Users</h3>
 
               <p>
@@ -186,7 +186,7 @@ function Dashboard() {
             </div>
 
 
-            <div className="stat-card">
+            <div className="stat-card foods-card">
               <h3>Total Foods</h3>
 
               <p>
@@ -197,7 +197,7 @@ function Dashboard() {
             </div>
 
 
-            <div className="stat-card">
+            <div className="stat-card orders-card">
               <h3>Total Orders</h3>
 
               <p>
@@ -208,7 +208,7 @@ function Dashboard() {
             </div>
 
 
-            <div className="stat-card">
+            <div className="stat-card pending-card">
               <h3>Pending Orders</h3>
 
               <p>
@@ -219,7 +219,7 @@ function Dashboard() {
             </div>
 
 
-            <div className="stat-card">
+            <div className="stat-card revenue-card">
               <h3>Total Revenue</h3>
 
               <p>
