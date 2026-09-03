@@ -9,11 +9,11 @@ function MyOrders() {
   const [loading, setLoading] = useState(true);
 
   const handleLogout = () => {
-  localStorage.removeItem("token");
-  localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
 
-  navigate("/login");
-};
+    navigate("/login");
+  };
 
   const fetchMyOrders = async () => {
     try {
@@ -21,15 +21,9 @@ function MyOrders() {
         "/orders/my-orders",
         {
           headers: {
-            Authorization:
-              `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
-      );
-
-      console.log(
-        "My Orders:",
-        response.data
       );
 
       setOrders(response.data);
@@ -49,128 +43,125 @@ function MyOrders() {
   }, []);
 
   return (
-    <div>
+    <div className="orders-page">
 
-      <h1>📋 My Orders</h1>
-
-      <div>
-  <button onClick={() => navigate("/menu")}>
-    🍔 Food Menu
-  </button>
-
-  {" "}
-
-  <button onClick={() => navigate("/cart")}>
-    🛒 Cart
-  </button>
-
-  {" "}
-
-  <button onClick={() => navigate("/my-orders")}>
-    📋 My Orders
-  </button>
-  <button onClick={handleLogout}>
-             Logout
- </button>
-      </div>
-
-<br />
-
-      {loading ? (
-        <p>Loading orders...</p>
-      ) : orders.length === 0 ? (
+      <header className="menu-header">
 
         <div>
+          <h1>📋 My Orders</h1>
+          <p>Track all your food orders</p>
+        </div>
 
-          <p>
-            You haven't placed any orders yet.
-          </p>
+        <div className="menu-actions">
 
-          <button
-            onClick={() =>
-              navigate("/menu")
-            }
-          >
-            🍔 Order Food
+          <button onClick={() => navigate("/menu")}>
+            🍔 Food Menu
           </button>
-        </div>
 
-      ) : (
+          <button onClick={() => navigate("/cart")}>
+            🛒 Cart
+          </button>
 
-        <div>
-
-          {orders.map((order) => (
-
-            <div key={order._id}>
-
-              <h2>
-                Order ID: {order._id}
-              </h2>
-
-              <h3>Items</h3>
-
-              {order.items.map((item) => (
-
-                <div key={item._id}>
-
-                  <p>
-                    Food:{" "}
-                    {item.food?.name}
-                  </p>
-
-                  <p>
-                    Quantity:{" "}
-                    {item.quantity}
-                  </p>
-
-                  <p>
-                    Price: ৳{" "}
-                    {item.food?.price}
-                  </p>
-
-                </div>
-
-              ))}
-
-              <p>
-                <strong>
-                  Total:
-                </strong>{" "}
-                ৳ {order.totalAmount}
-              </p>
-
-              <p>
-                <strong>
-                  Payment:
-                </strong>{" "}
-                {order.paymentMethod}
-              </p>
-
-              <p>
-                <strong>
-                  Status:
-                </strong>{" "}
-                {order.status}
-              </p>
-
-              <p>
-                <strong>
-                  Ordered:
-                </strong>{" "}
-                {new Date(
-                  order.createdAt
-                ).toLocaleString()}
-              </p>
-
-              <hr />
-
-            </div>
-
-          ))}
+          <button onClick={handleLogout}>
+            Logout
+          </button>
 
         </div>
 
-      )}
+      </header>
+
+      <main className="food-container">
+
+        {loading ? (
+
+          <div className="loading">
+            <h3>Loading orders...</h3>
+          </div>
+
+        ) : orders.length === 0 ? (
+
+          <div className="empty-food">
+
+            <h2>No Orders Yet</h2>
+
+            <p>
+              You haven't placed any orders yet.
+            </p>
+
+            <button
+              className="add-cart-btn"
+              onClick={() => navigate("/menu")}
+            >
+              🍔 Order Food
+            </button>
+
+          </div>
+
+        ) : (
+
+          <div className="orders-grid">
+
+            {orders.map((order) => (
+
+              <div
+                className="my-order-card"
+                key={order._id}
+              >
+
+                <h3>Order #{order._id.slice(-6)}</h3>
+
+                <p>
+                  <strong>Total:</strong>
+                  {" "}৳ {order.totalAmount}
+                </p>
+
+                <p>
+                  <strong>Payment:</strong>
+                  {" "}{order.paymentMethod}
+                </p>
+
+                <p>
+                  <strong>Status:</strong>
+                  {" "}{order.status}
+                </p>
+
+                <p>
+                  <strong>Date:</strong>
+                  {" "}
+                  {new Date(
+                    order.createdAt
+                  ).toLocaleString()}
+                </p>
+
+                <hr />
+
+                <h4>Items</h4>
+
+                {order.items.map((item) => (
+
+                  <div key={item._id}>
+
+                    <p>
+                      🍔 {item.food?.name}
+                    </p>
+
+                    <p>
+                      Qty: {item.quantity}
+                    </p>
+
+                  </div>
+
+                ))}
+
+              </div>
+
+            ))}
+
+          </div>
+
+        )}
+
+      </main>
 
     </div>
   );

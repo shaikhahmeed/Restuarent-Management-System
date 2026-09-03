@@ -16,7 +16,6 @@ function Foods() {
     image: "",
     available: true,
   });
-  
 
   const fetchFoods = async () => {
     try {
@@ -25,7 +24,6 @@ function Foods() {
       console.log("Foods:", response.data);
 
       setFoods(response.data.foods);
-
     } catch (error) {
       console.error(
         "Failed to load foods:",
@@ -50,38 +48,114 @@ function Foods() {
   };
 
   const handleAddFood = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  try {
-    let response;
+    try {
+      let response;
 
-    if (editingFood) {
-      response = await API.put(
-        `/foods/${editingFood._id}`,
-        {
-          ...formData,
-          price: Number(formData.price),
-        }
+      if (editingFood) {
+        response = await API.put(
+          `/foods/${editingFood._id}`,
+          {
+            ...formData,
+            price: Number(formData.price),
+          }
+        );
+
+        alert("Food updated successfully!");
+      } else {
+        response = await API.post(
+          "/foods",
+          {
+            ...formData,
+            price: Number(formData.price),
+          }
+        );
+
+        alert("Food added successfully!");
+      }
+
+      console.log("Food response:", response.data);
+
+      setFormData({
+        name: "",
+        description: "",
+        price: "",
+        category: "",
+        image: "",
+        available: true,
+      });
+
+      setEditingFood(null);
+      setShowForm(false);
+
+      fetchFoods();
+    } catch (error) {
+      console.error(
+        "Failed to save food:",
+        error.response?.data
       );
 
-      alert("Food updated successfully!");
-
-    } else {
-      response = await API.post(
-        "/foods",
-        {
-          ...formData,
-          price: Number(formData.price),
-        }
+      alert(
+        error.response?.data?.message ||
+          "Failed to save food"
       );
+    }
+  };
 
-      alert("Food added successfully!");
+  const handleDeleteFood = async (id) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this food?"
+    );
+
+    if (!confirmDelete) {
+      return;
     }
 
-    console.log(
-      "Food response:",
-      response.data
-    );
+    try {
+      const response = await API.delete(
+        `/foods/${id}`
+      );
+
+      console.log(
+        "Food deleted:",
+        response.data
+      );
+
+      alert("Food deleted successfully!");
+
+      fetchFoods();
+    } catch (error) {
+      console.error(
+        "Failed to delete food:",
+        error.response?.data
+      );
+
+      alert(
+        error.response?.data?.message ||
+          "Failed to delete food"
+      );
+    }
+  };
+
+  const handleEditFood = (food) => {
+    setEditingFood(food);
+
+    setFormData({
+      name: food.name,
+      description: food.description,
+      price: food.price,
+      category: food.category,
+      image: food.image || "",
+      available: food.available,
+    });
+
+    setShowForm(true);
+  };
+
+  const resetForm = () => {
+    setShowForm(false);
+    setEditingFood(null);
 
     setFormData({
       name: "",
@@ -91,288 +165,346 @@ function Foods() {
       image: "",
       available: true,
     });
-
-    setEditingFood(null);
-    setShowForm(false);
-
-    fetchFoods();
-
-  } catch (error) {
-    console.error(
-      "Failed to save food:",
-      error.response?.data
-    );
-
-    alert(
-      error.response?.data?.message ||
-      "Failed to save food"
-    );
-  }
-};
-
-  const handleDeleteFood = async (id) => {
-  const confirmDelete = window.confirm(
-    "Are you sure you want to delete this food?"
-  );
-
-  if (!confirmDelete) {
-    return;
-  }
-
-  try {
-    const response = await API.delete(
-      `/foods/${id}`
-    );
-
-    console.log(
-      "Food deleted:",
-      response.data
-    );
-
-    alert("Food deleted successfully!");
-
-    fetchFoods();
-
-  } catch (error) {
-    console.error(
-      "Failed to delete food:",
-      error.response?.data
-    );
-
-    alert(
-      error.response?.data?.message ||
-      "Failed to delete food"
-    );
-  }
-};
-
-const handleEditFood = (food) => {
-  setEditingFood(food);
-
-  setFormData({
-    name: food.name,
-    description: food.description,
-    price: food.price,
-    category: food.category,
-    image: food.image || "",
-    available: food.available,
-  });
-
-  setShowForm(true);
-};
+  };
 
   return (
     <div className="foods-page">
 
-      <h1>Food Management</h1>
+      {/* Header */}
 
-      <button
-    onClick={() => {
-    setShowForm(!showForm);
-    setEditingFood(null);
+      <div className="foods-header">
 
-    setFormData({
-      name: "",
-      description: "",
-      price: "",
-      category: "",
-      image: "",
-      available: true,
-        });
-    }}
-    >
-  {showForm
-    ? "Close Form"
-    : "+ Add New Food"}
-</button>
+        <div>
+          <h1>🍔 Food Management</h1>
+
+          <p>
+            Manage restaurant food items,
+            prices and availability.
+          </p>
+        </div>
+
+        <button
+          className="add-food-btn"
+          onClick={() => {
+            if (showForm) {
+              resetForm();
+            } else {
+              setShowForm(true);
+              setEditingFood(null);
+            }
+          }}
+        >
+          {showForm
+            ? "✕ Close Form"
+            : "+ Add New Food"}
+        </button>
+
+      </div>
 
 
-      {/* Add Food Form */}
+      {/* Add / Edit Form */}
 
       {showForm && (
-        <form onSubmit={handleAddFood}>
+        <div className="food-form-card">
 
-          <div>
-            <label>
-              Food Name
-            </label>
+          <div className="form-header">
 
-            <input
-              type="text"
-              name="name"
-              placeholder="Enter food name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-            />
+            <div>
+              <h2>
+                {editingFood
+                  ? "✏️ Edit Food"
+                  : "➕ Add New Food"}
+              </h2>
+
+              <p>
+                Enter the food information below.
+              </p>
+            </div>
+
           </div>
 
 
-          <div>
-            <label>
-              Description
-            </label>
+          <form
+            className="food-form"
+            onSubmit={handleAddFood}
+          >
 
-            <textarea
-              name="description"
-              placeholder="Enter description"
-              value={formData.description}
-              onChange={handleChange}
-              required
-            />
-          </div>
+            <div className="form-group">
 
+              <label>Food Name</label>
 
-          <div>
-            <label>
-              Price
-            </label>
+              <input
+                type="text"
+                name="name"
+                placeholder="Enter food name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+              />
 
-            <input
-              type="number"
-              name="price"
-              placeholder="Enter price"
-              value={formData.price}
-              onChange={handleChange}
-              required
-            />
-          </div>
+            </div>
 
 
-          <div>
-            <label>
-              Category
-            </label>
+            <div className="form-group">
 
-            <input
-              type="text"
-              name="category"
-              placeholder="Enter category"
-              value={formData.category}
-              onChange={handleChange}
-              required
-            />
-          </div>
+              <label>Price</label>
 
+              <input
+                type="number"
+                name="price"
+                placeholder="Enter price"
+                value={formData.price}
+                onChange={handleChange}
+                required
+              />
 
-          <div>
-            <label>
-              Image URL
-            </label>
-
-            <input
-              type="text"
-              name="image"
-              placeholder="Enter image URL"
-              value={formData.image}
-              onChange={handleChange}
-            />
-          </div>
+            </div>
 
 
-          <div>
-            <label>
-              Available
-            </label>
+            <div className="form-group">
 
-            <select
-              name="available"
-              value={formData.available}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  available:
-                    e.target.value === "true",
-                })
-              }
-            >
-              <option value="true">
-                Available
-              </option>
+              <label>Category</label>
 
-              <option value="false">
-                Unavailable
-              </option>
-            </select>
-          </div>
+              <input
+                type="text"
+                name="category"
+                placeholder="e.g. Burger, Pizza, Drinks"
+                value={formData.category}
+                onChange={handleChange}
+                required
+              />
+
+            </div>
 
 
-          <br />
+            <div className="form-group">
 
-            <button type="submit">
-             {editingFood
-             ? "Update Food"
-             : "Add Food"}
-            </button>
+              <label>Image URL</label>
 
-        </form>
+              <input
+                type="text"
+                name="image"
+                placeholder="Enter image URL"
+                value={formData.image}
+                onChange={handleChange}
+              />
+
+            </div>
+
+
+            <div className="form-group full-width">
+
+              <label>Description</label>
+
+              <textarea
+                name="description"
+                placeholder="Enter food description"
+                value={formData.description}
+                onChange={handleChange}
+                rows="4"
+                required
+              />
+
+            </div>
+
+
+            <div className="form-group">
+
+              <label>Availability</label>
+
+              <select
+                name="available"
+                value={formData.available}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    available:
+                      e.target.value === "true",
+                  })
+                }
+              >
+
+                <option value="true">
+                  Available
+                </option>
+
+                <option value="false">
+                  Unavailable
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div className="form-actions">
+
+              <button
+                type="button"
+                className="cancel-btn"
+                onClick={resetForm}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                className="save-food-btn"
+              >
+                {editingFood
+                  ? "Update Food"
+                  : "Add Food"}
+              </button>
+
+            </div>
+
+          </form>
+
+        </div>
       )}
-
-
-      <hr />
 
 
       {/* Food List */}
 
-      <h2>All Foods</h2>
+      <div className="foods-list-section">
 
-      {loading ? (
-        <p>Loading foods...</p>
+        <div className="foods-list-header">
 
-      ) : foods.length === 0 ? (
-        <p>No foods found.</p>
+          <div>
+            <h2>All Foods</h2>
 
-      ) : (
-
-        <div>
-
-          {foods.map((food) => (
-
-            <div key={food._id}>
-
-              <h2>
-                {food.name}
-              </h2>
-
-              <p>
-                {food.description}
-              </p>
-
-              <p>
-                Price: ৳ {food.price}
-              </p>
-
-              <p>
-                Category: {food.category}
-              </p>
-
-              <p>
-                Status:{" "}
-                {food.available
-                  ? "Available"
-                  : "Unavailable"}
-              </p>
-
-             <button
-                onClick={() => handleEditFood(food)}>
-                Edit
-             </button>
-
-              <button
-                onClick={() => handleDeleteFood(food._id)}
-                >
-                Delete
-              </button>
-
-              <hr />
-
-            </div>
-
-          ))}
+            <p>
+              {foods.length} food item
+              {foods.length !== 1 ? "s" : ""}{" "}
+              available in the system.
+            </p>
+          </div>
 
         </div>
 
-      )}
+
+        {loading ? (
+          <div className="foods-message">
+            <p>Loading foods...</p>
+          </div>
+
+        ) : foods.length === 0 ? (
+
+          <div className="foods-message">
+
+            <div className="empty-food-icon">
+              🍽️
+            </div>
+
+            <h3>No Foods Found</h3>
+
+            <p>
+              Add your first food item to
+              the restaurant menu.
+            </p>
+
+          </div>
+
+        ) : (
+
+          <div className="admin-food-grid">
+
+            {foods.map((food) => (
+
+              <div
+                className="admin-food-card"
+                key={food._id}
+              >
+
+                {/* Image */}
+
+                <div className="admin-food-image">
+
+                  {food.image ? (
+                    <img
+                      src={food.image}
+                      alt={food.name}
+                    />
+                  ) : (
+                    <span>🍽️</span>
+                  )}
+
+                  <span
+                    className={
+                      food.available
+                        ? "status-badge available-badge"
+                        : "status-badge unavailable-badge"
+                    }
+                  >
+                    {food.available
+                      ? "Available"
+                      : "Unavailable"}
+                  </span>
+
+                </div>
+
+
+                {/* Information */}
+
+                <div className="admin-food-info">
+
+                  <div className="admin-food-title">
+
+                    <h3>{food.name}</h3>
+
+                    <span className="category-badge">
+                      {food.category}
+                    </span>
+
+                  </div>
+
+
+                  <p className="admin-food-description">
+                    {food.description}
+                  </p>
+
+
+                  <div className="admin-food-bottom">
+
+                    <strong className="admin-food-price">
+                      ৳ {food.price}
+                    </strong>
+
+                    <div className="food-actions">
+
+                      <button
+                        className="edit-food-btn"
+                        onClick={() =>
+                          handleEditFood(food)
+                        }
+                      >
+                        ✏️ Edit
+                      </button>
+
+                      <button
+                        className="delete-food-btn"
+                        onClick={() =>
+                          handleDeleteFood(food._id)
+                        }
+                      >
+                        🗑️ Delete
+                      </button>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            ))}
+
+          </div>
+
+        )}
+
+      </div>
 
     </div>
   );

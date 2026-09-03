@@ -3,242 +3,253 @@ import API from "../api/api";
 import { useNavigate } from "react-router-dom";
 
 function FoodMenu() {
-  const [foods, setFoods] = useState([]);
-  const [loading, setLoading] = useState(true);
+const [foods, setFoods] = useState([]);
+const [loading, setLoading] = useState(true);
 
-  const navigate = useNavigate();
+const navigate = useNavigate();
 
-  const fetchFoods = async () => {
-    try {
-      const response = await API.get("/foods");
+const fetchFoods = async () => {
+try {
+const response = await API.get("/foods");
 
-      console.log("Foods:", response.data);
 
-      setFoods(response.data.foods || []);
+  console.log("Foods:", response.data);
 
-    } catch (error) {
-      console.error(
-        "Failed to load foods:",
-        error.response?.data
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+  setFoods(response.data.foods || []);
+} catch (error) {
+  console.error(
+    "Failed to load foods:",
+    error.response?.data
+  );
+} finally {
+  setLoading(false);
+}
 
-  useEffect(() => {
-    fetchFoods();
-  }, []);
 
-  // Add Food to Cart
-  const addToCart = (food) => {
-    const existingCart =
-      JSON.parse(localStorage.getItem("cart")) || [];
+};
 
-    const existingItem = existingCart.find(
-      (item) => item.food === food._id
-    );
+useEffect(() => {
+fetchFoods();
+}, []);
 
-    let updatedCart;
+// Add Food to Cart
+const addToCart = (food) => {
+const existingCart =
+JSON.parse(localStorage.getItem("cart")) || [];
 
-    if (existingItem) {
-      updatedCart = existingCart.map((item) =>
-        item.food === food._id
-          ? {
-              ...item,
-              quantity: item.quantity + 1,
-            }
-          : item
-      );
-    } else {
-      updatedCart = [
-        ...existingCart,
-        {
-          food: food._id,
-          name: food.name,
-          price: food.price,
-          quantity: 1,
-        },
-      ];
-    }
 
-    localStorage.setItem(
-      "cart",
-      JSON.stringify(updatedCart)
-    );
+const existingItem = existingCart.find(
+  (item) => item.food === food._id
+);
 
-    alert(`${food.name} added to cart!`);
-  };
+let updatedCart;
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    localStorage.removeItem("cart");
+if (existingItem) {
+  updatedCart = existingCart.map((item) =>
+    item.food === food._id
+      ? {
+          ...item,
+          quantity: item.quantity + 1,
+        }
+      : item
+  );
+} else {
+  updatedCart = [
+    ...existingCart,
+    {
+      food: food._id,
+      name: food.name,
+      price: food.price,
+      quantity: 1,
+    },
+  ];
+}
 
-    navigate("/login");
-  };
+localStorage.setItem(
+  "cart",
+  JSON.stringify(updatedCart)
+);
 
-  return (
-    <div className="menu-page">
+alert(`${food.name} added to cart!`);
 
-      {/* Header */}
-      <header className="menu-header">
 
-        <div>
-          <h1>🍽️ Restaurant Management System</h1>
-          <p>Delicious food, made for you ❤️</p>
+};
+
+const handleLogout = () => {
+localStorage.removeItem("token");
+localStorage.removeItem("user");
+localStorage.removeItem("cart");
+
+
+navigate("/login");
+
+
+};
+
+return ( <div className="menu-page">
+
+  {/* Header */}
+  <header className="menu-header">
+
+    <div className="menu-brand">
+      <h1>🍽️ Restaurant Management System</h1>
+      <p>Delicious food, made for you ❤️</p>
+    </div>
+
+    <div className="menu-actions">
+
+      <button
+        className="menu-cart-btn"
+        onClick={() => navigate("/cart")}
+      >
+        🛒 View Cart
+      </button>
+
+      <button
+        className="menu-orders-btn"
+        onClick={() => navigate("/my-orders")}
+      >
+        📋 My Orders
+      </button>
+
+      <button
+        className="menu-logout-btn"
+        onClick={handleLogout}
+      >
+        Logout
+      </button>
+
+    </div>
+
+  </header>
+
+  {/* Food Section */}
+  <main className="food-container">
+
+    <div className="food-title">
+      <h2>🍔 Our Food Menu</h2>
+
+      <p>
+        Choose your favorite food and add it
+        to your cart.
+      </p>
+    </div>
+
+    {/* Loading */}
+    {loading ? (
+
+      <div className="loading">
+        <div className="menu-spinner"></div>
+        <h3>Loading foods...</h3>
+      </div>
+
+    ) : foods.length === 0 ? (
+
+      <div className="empty-food">
+        <div className="empty-food-icon">
+          🍽️
         </div>
 
-        <div className="menu-actions">
+        <h3>No foods available</h3>
 
-          <button
-            onClick={() => navigate("/cart")}
+        <p>
+          Please check again later.
+        </p>
+      </div>
+
+    ) : (
+
+      <div className="food-grid">
+
+        {foods.map((food) => (
+
+          <div
+            className="food-card"
+            key={food._id}
           >
-            🛒 View Cart
-          </button>
 
-          <button
-            onClick={() => navigate("/my-orders")}
-          >
-            📋 My Orders
-          </button>
+            {/* Food Image */}
+            <div className="food-image">
 
-          <button
-            onClick={handleLogout}
-          >
-            Logout
-          </button>
+              {food.image ? (
+                <img
+                  src={food.image}
+                  alt={food.name}
+                />
+              ) : (
+                <span>🍔</span>
+              )}
 
-        </div>
-
-      </header>
-
-
-      {/* Food Section */}
-      <main className="food-container">
-
-        <div className="food-title">
-
-          <h2>🍔 Our Food Menu</h2>
-
-          <p>
-            Choose your favorite food and add it
-            to your cart.
-          </p>
-
-        </div>
-
-
-        {/* Loading */}
-        {loading ? (
-
-          <div className="loading">
-            <h3>Loading foods...</h3>
-          </div>
-
-        ) : foods.length === 0 ? (
-
-          <div className="empty-food">
-            <h3>No foods available.</h3>
-            <p>Please check again later.</p>
-          </div>
-
-        ) : (
-
-          <div className="food-grid">
-
-            {foods.map((food) => (
-
-              <div
-                className="food-card"
-                key={food._id}
+              <span
+                className={
+                  food.available
+                    ? "food-availability available-badge"
+                    : "food-availability unavailable-badge"
+                }
               >
+                {food.available
+                  ? "Available"
+                  : "Unavailable"}
+              </span>
 
-                {/* Food Image */}
-                <div className="food-image">
+            </div>
 
-                  {food.image ? (
-                    <img
-                      src={food.image}
-                      alt={food.name}
-                    />
-                  ) : (
-                    <span>🍔</span>
-                  )}
+            {/* Food Information */}
+            <div className="food-info">
 
-                </div>
+              <div className="food-card-header">
 
+                <h3>
+                  {food.name}
+                </h3>
 
-                {/* Food Information */}
-                <div className="food-info">
-
-                  <div className="food-card-header">
-
-                    <h3>
-                      {food.name}
-                    </h3>
-
-                    <span className="food-category">
-                      {food.category}
-                    </span>
-
-                  </div>
-
-
-                  <p className="food-description">
-                    {food.description}
-                  </p>
-
-
-                  <div className="food-bottom">
-
-                    <div>
-
-                      <p className="food-price">
-                        ৳ {food.price}
-                      </p>
-
-                      <p
-                        className={
-                          food.available
-                            ? "available"
-                            : "unavailable"
-                        }
-                      >
-                        {food.available
-                          ? "✓ Available"
-                          : "✕ Unavailable"}
-                      </p>
-
-                    </div>
-
-
-                    <button
-                      className="add-cart-btn"
-                      onClick={() =>
-                        addToCart(food)
-                      }
-                      disabled={!food.available}
-                    >
-                      🛒 Add
-                    </button>
-
-                  </div>
-
-                </div>
+                <span className="food-category">
+                  {food.category}
+                </span>
 
               </div>
 
-            ))}
+              <p className="food-description">
+                {food.description}
+              </p>
+
+              <div className="food-bottom">
+
+                <div>
+                  <p className="food-price">
+                    ৳ {food.price}
+                  </p>
+                </div>
+
+                <button
+                  className="add-cart-btn"
+                  onClick={() =>
+                    addToCart(food)
+                  }
+                  disabled={!food.available}
+                >
+                  {food.available
+                    ? "🛒 Add to Cart"
+                    : "Unavailable"}
+                </button>
+
+              </div>
+
+            </div>
 
           </div>
 
-        )}
+        ))}
 
-      </main>
+      </div>
 
-    </div>
-  );
+    )}
+
+  </main>
+
+</div>
+
+);
 }
 
 export default FoodMenu;

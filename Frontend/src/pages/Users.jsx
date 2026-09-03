@@ -9,13 +9,9 @@ function Users() {
     try {
       const response = await API.get("/users");
 
-      console.log(
-        "Users:",
-        response.data
-      );
+      console.log("Users:", response.data);
 
       setUsers(response.data);
-
     } catch (error) {
       console.error(
         "Failed to load users:",
@@ -30,50 +26,107 @@ function Users() {
     fetchUsers();
   }, []);
 
+  const getRoleClass = (role) => {
+    if (role === "admin") {
+      return "user-role-admin";
+    }
+
+    return "user-role-customer";
+  };
+
   return (
-    <div>
+    <div className="users-page">
 
-      <h1>User Management</h1>
-
-      {loading ? (
-        <p>Loading users...</p>
-      ) : users.length === 0 ? (
-        <p>No users found.</p>
-      ) : (
-
+      {/* Page Header */}
+      <div className="users-header">
         <div>
+          <h1>User Management</h1>
+          <p>Manage and view registered system users</p>
+        </div>
+
+        <div className="users-count">
+          <span>{users.length}</span>
+          <small>Total Users</small>
+        </div>
+      </div>
+
+      {/* Loading */}
+      {loading ? (
+        <div className="users-message">
+          <div className="loading-spinner"></div>
+          <p>Loading users...</p>
+        </div>
+      ) : users.length === 0 ? (
+        /* Empty State */
+        <div className="users-message empty-users">
+          <div className="empty-user-icon">👥</div>
+          <h2>No Users Found</h2>
+          <p>
+            There are currently no registered users.
+          </p>
+        </div>
+      ) : (
+        /* Users */
+        <div className="users-grid">
 
           {users.map((user) => (
 
-            <div key={user._id}>
+            <div
+              className="user-card"
+              key={user._id}
+            >
 
-              <h2>
-                {user.name}
-              </h2>
+              {/* User Avatar */}
+              <div className="user-avatar">
+                {user.name
+                  ?.charAt(0)
+                  .toUpperCase()}
+              </div>
 
-              <p>
-                Email: {user.email}
-              </p>
+              {/* User Information */}
+              <div className="user-info">
 
-              <p>
-                Role: {user.role}
-              </p>
+                <div className="user-name-row">
+                  <h2>{user.name}</h2>
 
-              <p>
-                Created:{" "}
-                {new Date(
-                  user.createdAt
-                ).toLocaleDateString()}
-              </p>
+                  <span
+                    className={`user-role ${getRoleClass(
+                      user.role
+                    )}`}
+                  >
+                    {user.role}
+                  </span>
+                </div>
 
-              <hr />
+                <div className="user-detail">
+                  <span className="user-label">
+                    Email
+                  </span>
+
+                  <strong>
+                    {user.email}
+                  </strong>
+                </div>
+
+                <div className="user-detail">
+                  <span className="user-label">
+                    Joined
+                  </span>
+
+                  <strong>
+                    {new Date(
+                      user.createdAt
+                    ).toLocaleDateString()}
+                  </strong>
+                </div>
+
+              </div>
 
             </div>
 
           ))}
 
         </div>
-
       )}
 
     </div>

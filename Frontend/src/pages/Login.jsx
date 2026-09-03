@@ -51,62 +51,97 @@ function Login() {
 
       alert(
         error.response?.data?.message ||
-        "Login failed"
+          "Login failed"
       );
     }
   };
 
   return (
-    <div>
+    <div className="auth-page">
 
-      <h1>Login</h1>
+      <div className="auth-card">
 
-      <form onSubmit={handleLogin}>
+        {/* Logo / Icon */}
+        <div className="auth-icon">
+          🍽️
+        </div>
 
-        <input
-          type="email"
-          placeholder="Enter email"
-          value={email}
-          onChange={(e) =>
-            setEmail(e.target.value)
-          }
-        />
+        <div className="auth-header">
+          <h1>Welcome Back!</h1>
 
-        <br />
-        <br />
+          <p>
+            Login to your Restaurant Management
+            account
+          </p>
+        </div>
 
-        <input
-          type="password"
-          placeholder="Enter password"
-          value={password}
-          onChange={(e) =>
-            setPassword(e.target.value)
-          }
-        />
-
-        <br />
-        <br />
-
-        <button type="submit">
-          Login
-        </button>
-
-        <br />
-        <br />
-
-        <button
-          type="button"
-          onClick={() =>
-            navigate("/register")
-          }
+        {/* Login Form */}
+        <form
+          className="auth-form"
+          onSubmit={handleLogin}
         >
-          Create New Account
-        </button>
 
-      </form>
+          <div className="auth-form-group">
+            <label>Email Address</label>
+
+            <input
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) =>
+                setEmail(e.target.value)
+              }
+              required
+            />
+          </div>
+
+          <div className="auth-form-group">
+            <label>Password</label>
+
+            <input
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) =>
+                setPassword(e.target.value)
+              }
+              required
+            />
+          </div>
+
+          <button
+            className="auth-submit-btn"
+            type="submit"
+          >
+            Login
+          </button>
+
+        </form>
+
+        {/* Register */}
+        <div className="auth-footer">
+
+          <p>
+            Don't have an account?
+          </p>
+
+          <button
+            type="button"
+            className="auth-register-btn"
+            onClick={() =>
+              navigate("/register")
+            }
+          >
+            Create New Account
+          </button>
+
+        </div>
+
+      </div>
 
     </div>
   );
 }
 
 export default Login;
+

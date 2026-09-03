@@ -3,180 +3,221 @@ import { useNavigate } from "react-router-dom";
 import API from "../api/api";
 
 function Checkout() {
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
-const [cart, setCart] = useState([]);
-const [paymentMethod, setPaymentMethod] = useState("Cash");
+  const [cart, setCart] = useState([]);
+  const [paymentMethod, setPaymentMethod] = useState("Cash");
 
-useEffect(() => {
-const savedCart =
-JSON.parse(localStorage.getItem("cart")) || [];
+  useEffect(() => {
+    const savedCart =
+      JSON.parse(localStorage.getItem("cart")) || [];
 
+    setCart(savedCart);
+  }, []);
 
-setCart(savedCart);
+  const totalAmount = cart.reduce(
+    (total, item) =>
+      total + item.price * item.quantity,
+    0
+  );
 
-
-}, []);
-
-const totalAmount = cart.reduce(
-(total, item) =>
-total + item.price * item.quantity,
-0
-);
-
-const handlePlaceOrder = async () => {
-if (cart.length === 0) {
-alert("Your cart is empty!");
-return;
-}
-
-
-try {
-  const items = cart.map((item) => ({
-    food: item.food,
-    quantity: item.quantity,
-  }));
-
-  const response = await API.post(
-    "/orders",
-    {
-      items,
-      totalAmount,
-      paymentMethod,
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
+  const handlePlaceOrder = async () => {
+    if (cart.length === 0) {
+      alert("Your cart is empty!");
+      return;
     }
-  );
 
-  console.log("Order placed:", response.data);
+    try {
+      const items = cart.map((item) => ({
+        food: item.food,
+        quantity: item.quantity,
+      }));
 
-  alert("Order placed successfully!");
+      const response = await API.post(
+        "/orders",
+        {
+          items,
+          totalAmount,
+          paymentMethod,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
-  localStorage.removeItem("cart");
+      console.log(
+        "Order placed:",
+        response.data
+      );
 
-  navigate("/my-orders");
+      alert("Order placed successfully!");
 
-} catch (error) {
-  console.error(
-    "Failed to place order:",
-    error.response?.data
-  );
+      localStorage.removeItem("cart");
 
-  alert(
-    error.response?.data?.message ||
-    "Failed to place order"
-  );
-}
+      navigate("/my-orders");
 
+    } catch (error) {
+      console.error(
+        "Failed to place order:",
+        error.response?.data
+      );
 
-};
+      alert(
+        error.response?.data?.message ||
+          "Failed to place order"
+      );
+    }
+  };
 
-return ( <div>
+  return (
+    <div className="checkout-page">
 
-```
-  <h1>💳 Checkout</h1>
+      <header className="checkout-header">
 
-  {cart.length === 0 ? (
-
-    <div>
-
-      <p>Your cart is empty.</p>
-
-      <button
-        onClick={() => navigate("/menu")}
-      >
-        🍔 Go to Menu
-      </button>
-
-    </div>
-
-  ) : (
-
-    <div>
-
-      <h2>Order Summary</h2>
-
-      {cart.map((item) => (
-
-        <div key={item.food}>
-
+        <div>
+          <h1>💳 Checkout</h1>
           <p>
-            <strong>{item.name}</strong>
+            Review your order and confirm payment
           </p>
-
-          <p>
-            Price: ৳ {item.price}
-          </p>
-
-          <p>
-            Quantity: {item.quantity}
-          </p>
-
-          <p>
-            Subtotal: ৳{" "}
-            {item.price * item.quantity}
-          </p>
-
-          <hr />
-
         </div>
 
-      ))}
+      </header>
 
-      <h2>
-        Total: ৳ {totalAmount}
-      </h2>
+      <main className="checkout-container">
 
-      <h2>Payment Method</h2>
+        {cart.length === 0 ? (
 
-      <select
-        value={paymentMethod}
-        onChange={(e) =>
-          setPaymentMethod(e.target.value)
-        }
-      >
+          <div className="empty-cart">
 
-        <option value="Cash">
-          Cash
-        </option>
+            <div className="empty-cart-icon">
+              🛒
+            </div>
 
-        <option value="Card">
-          Card
-        </option>
+            <h2>Your cart is empty</h2>
 
-        <option value="Online">
-          Online Payment
-        </option>
+            <p>
+              Please add some food before checkout.
+            </p>
 
-      </select>
+            <button
+              onClick={() => navigate("/menu")}
+            >
+              🍔 Go to Menu
+            </button>
 
-      <br />
-      <br />
+          </div>
 
-      <button
-        onClick={() => navigate("/cart")}
-      >
-        ← Back to Cart
-      </button>
+        ) : (
 
-      {" "}
+          <div className="checkout-layout">
 
-      <button
-        onClick={handlePlaceOrder}
-      >
-        📦 Place Order
-      </button>
+            <section className="checkout-items">
+
+              <h2>Order Summary</h2>
+
+              {cart.map((item) => (
+
+                <div
+                  className="checkout-item"
+                  key={item.food}
+                >
+
+                  <div>
+
+                    <h3>
+                      {item.name}
+                    </h3>
+
+                    <p>
+                      Quantity:
+                      {" "}
+                      {item.quantity}
+                    </p>
+
+                  </div>
+
+                  <strong>
+                    ৳ {item.price * item.quantity}
+                  </strong>
+
+                </div>
+
+              ))}
+
+            </section>
+
+
+            <aside className="checkout-summary">
+
+              <h2>Payment Details</h2>
+
+              <label>
+                Select Payment Method
+              </label>
+
+              <select
+                value={paymentMethod}
+                onChange={(e) =>
+                  setPaymentMethod(
+                    e.target.value
+                  )
+                }
+              >
+
+                <option value="Cash">
+                  Cash
+                </option>
+
+                <option value="Card">
+                  Card
+                </option>
+
+                <option value="Online">
+                  Online Payment
+                </option>
+
+              </select>
+
+              <div className="summary-divider"></div>
+
+              <div className="summary-total">
+
+                <span>Total</span>
+
+                <span>
+                  ৳ {totalAmount}
+                </span>
+
+              </div>
+
+              <button
+                className="checkout-btn"
+                onClick={handlePlaceOrder}
+              >
+                📦 Place Order
+              </button>
+
+              <button
+                className="continue-btn"
+                onClick={() =>
+                  navigate("/cart")
+                }
+              >
+                ← Back to Cart
+              </button>
+
+            </aside>
+
+          </div>
+
+        )}
+
+      </main>
 
     </div>
-
-  )}
-
-</div>
-
-);
+  );
 }
 
 export default Checkout;
